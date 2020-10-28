@@ -22,4 +22,4 @@ python main.py - скачивание картинок
 ```
 
 ## Пример выполнения программы
-![]()
+![](https://github.com/LevikovCollector/API_Salary_Table/blob/levikov/for_readme/console.jpg)
