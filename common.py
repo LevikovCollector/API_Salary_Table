@@ -2,13 +2,14 @@ import requests
 from terminaltables import AsciiTable
 
 API_HH = 'https://api.hh.ru'
-API_SJ = '	https://api.superjob.ru/2.0'
-#COMPUTER_LANGUAGE = ['Swift', 'Scala','Go', 'C', 'C#', 'C++', 'PHP', 'Ruby', 'Python', 'Java', 'JavaScript']
-COMPUTER_LANGUAGE = ['Swift']
+API_SJ = 'https://api.superjob.ru/2.0'
+COMPUTER_LANGUAGE = ['Swift', 'Scala','Go', 'C', 'C#', 'C++', 'PHP', 'Ruby', 'Python', 'Java', 'JavaScript']
+
 def get_vacancys_list_hh(lang_programming):
     town_id = 1
     first_page = 1
     max_page = 101
+    all_vac = []
     for page in range(first_page, max_page):
         vac_params = {'text': f'Программист {lang_programming}',
                       'area': {town_id},
@@ -20,7 +21,7 @@ def get_vacancys_list_hh(lang_programming):
         response = requests.get(f'{API_HH}/vacancies', params=vac_params)
         response.raise_for_status()
 
-        all_vac = [vacancy for vacancy in response.json()['items']]
+        all_vac += [vacancy for vacancy in response.json()['items']]
 
     return all_vac
 
@@ -29,6 +30,7 @@ def get_vacancys_list_sj(lang_programming, header):
     max_page = 101
     town_id = 4
     IT_catalog_id = 48
+    all_vac = []
     for page in range(first_page, max_page):
         vac_params = {'catalogues': {IT_catalog_id},
                       'town': {town_id},
@@ -39,25 +41,30 @@ def get_vacancys_list_sj(lang_programming, header):
 
         response = requests.get(f'{API_SJ}/vacancies/', headers=header, params=vac_params)
         response.raise_for_status()
-        all_vac = [vacancy for vacancy in response.json()['objects']]
+        all_vac += [vacancy for vacancy in response.json()['objects']]
 
     return all_vac
 
 def vacancys_processing(lang_programming, resource, header=None):
     vacancys_processed = {}
-    average_salary_by_vacancy = []
     for language in lang_programming:
         if resource == 'hh':
             vacancys_by_language = get_vacancys_list_hh(language)
         else:
             vacancys_by_language = get_vacancys_list_sj(language, header)
-        average_salary_by_vacancy = [predict_rub_salary(vacancy, resource) for vacancy in vacancys_by_language]
 
-        total_average_salary_by_vacancy = int(sum(average_salary_by_vacancy) / len(average_salary_by_vacancy))
-        vacancys_processed[language] = {
-            'vacancies_processed': len(vacancys_by_language),
-            'average_salary': total_average_salary_by_vacancy
-        }
+        average_salary_by_vacancy = [predict_rub_salary(vacancy, resource) for vacancy in vacancys_by_language]
+        if average_salary_by_vacancy:
+            total_average_salary_by_vacancy = int(sum(average_salary_by_vacancy) / len(average_salary_by_vacancy))
+            vacancys_processed[language] = {
+                'vacancies_processed': len(vacancys_by_language),
+                'average_salary': total_average_salary_by_vacancy
+            }
+        else:
+            vacancys_processed[language] = {
+                'vacancies_processed': len(vacancys_by_language),
+                'average_salary': 0
+            }
     return vacancys_processed
 
 def predict_rub_salary(vacancy, resource):
