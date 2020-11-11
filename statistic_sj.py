@@ -9,7 +9,7 @@ def get_vacancys_list_sj(langs_programming, header):
     max_page = 101
     town_id = 4
     IT_catalog_id = 48
-    data_block = {}
+    lang_with_vacancys = {}
     for lang_programming in langs_programming:
         all_vac = []
         for page in range(first_page, max_page):
@@ -24,8 +24,8 @@ def get_vacancys_list_sj(langs_programming, header):
             response.raise_for_status()
             all_vac += [vacancy for vacancy in response.json()['objects']]
             time.sleep(0.5)
-        data_block[lang_programming] = all_vac
-    return data_block
+        lang_with_vacancys[lang_programming] = all_vac
+    return lang_with_vacancys
 
 
 if __name__ == '__main__':

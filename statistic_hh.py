@@ -6,7 +6,7 @@ def get_vacancys_list_hh(langs_programming):
     town_id = 1
     first_page = 1
     max_page = 101
-    data_block = {}
+    lang_with_vacancys = {}
     for lang_programming in langs_programming:
         all_vac = []
         for page in range(first_page, max_page):
@@ -22,8 +22,8 @@ def get_vacancys_list_hh(langs_programming):
 
             all_vac += [vacancy for vacancy in response.json()['items']]
             time.sleep(0.5)
-        data_block[lang_programming] = all_vac
-    return data_block
+        lang_with_vacancys[lang_programming] = all_vac
+    return lang_with_vacancys
 
 if __name__ == '__main__':
     vacancys_hh = get_vacancys_list_hh(COMPUTER_LANGUAGE)
